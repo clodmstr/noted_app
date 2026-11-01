@@ -45,7 +45,6 @@
     .toolbar-group { transition: all 0.2s ease; }
     .toolbar-group:hover { transform: translateY(-1px); }
     
-    /* Styling untuk tombol toolbar yang aktif */
     .tb-btn.is-active {
       background-color: #e0f2fe !important;
       color: #0284c7 !important;
@@ -217,19 +216,14 @@
               <button data-cmd="strikeThrough" title="Strikethrough" class="tb-btn p-2 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300 line-through text-sm shadow-sm border border-gray-200 dark:border-gray-700">S</button>
               <button data-cmd="formatBlock" data-val="p" title="Paragraf" class="tb-btn p-2 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm shadow-sm border border-gray-200 dark:border-gray-700">P</button>
               <button data-cmd="formatBlock" data-val="pre" title="Code Block" class="tb-btn p-2 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300 shadow-sm border border-gray-200 dark:border-gray-700"><i class="fa-solid fa-code text-xs"></i></button>
-              
-              <!-- Text Color -->
               <label class="p-2 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm border border-gray-200 dark:border-gray-700" title="Warna Teks">
                 <i class="fa-solid fa-palette text-gray-700 dark:text-gray-300 text-xs"></i>
                 <input type="color" id="textColorPicker" class="opacity-0 w-0 h-0">
               </label>
-              
-              <!-- Highlight Color (NEW) -->
               <label class="p-2 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm border border-gray-200 dark:border-gray-700" title="Sorot Teks">
                 <i class="fa-solid fa-highlighter text-gray-700 dark:text-gray-300 text-xs"></i>
                 <input type="color" id="highlightColorPicker" class="opacity-0 w-0 h-0" value="#fef08a">
               </label>
-              
               <button data-cmd="removeFormat" title="Hapus Format" class="tb-btn p-2 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-gray-700 rounded-lg text-red-500 shadow-sm border border-gray-200 dark:border-gray-700"><i class="fa-solid fa-eraser text-xs"></i></button>
             </div>
           </div>
@@ -323,7 +317,8 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    const GDRIVE_CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+    // ✅ CLIENT ID SUDAH DIPASANG DI SINI
+    const GDRIVE_CLIENT_ID = '365427881478-1j1ej91jqdqi7vq4ii6hogfqhpb7tljn.apps.googleusercontent.com';
     const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
     let gdriveTokenClient, gdriveAccessToken = null, gdriveFileId = null, gdriveSyncTimer = null;
     const STORAGE_KEY = 'NOTED_APP_DATA_V1';
@@ -379,7 +374,6 @@
       }
     }
     function handleGDriveAuthClick() {
-      if (GDRIVE_CLIENT_ID.includes('YOUR_CLIENT_ID')) { alert('⚠️ Harap atur GDRIVE_CLIENT_ID di dalam kode.'); return; }
       if (gdriveAccessToken === null) gdriveTokenClient.requestAccessToken({prompt: 'consent'});
       else { showGDriveStatus('Menyinkronkan...'); uploadFileToDrive(); }
     }
@@ -888,13 +882,9 @@
           if (!cmd) return;
 
           if (cmd === 'formatBlock' && val) {
-            // Normalisasi nilai untuk kompatibilitas lintas browser yang lebih baik
             const currentBlock = document.queryCommandValue('formatBlock').toString().toLowerCase().replace(/[<>]/g, '').trim();
             const cleanVal = val.toLowerCase().replace(/[<>]/g, '').trim();
-            
-            // Menangani variasi nama block antar browser (misal: 'h1', 'heading 1', 'p', 'div')
-            isActive = (currentBlock === cleanVal) || 
-                       (cleanVal.startsWith('h') && currentBlock === `heading ${cleanVal.replace('h', '')}`);
+            isActive = (currentBlock === cleanVal) || (cleanVal.startsWith('h') && currentBlock === `heading ${cleanVal.replace('h', '')}`);
           } else {
             isActive = document.queryCommandState(cmd);
           }
@@ -914,19 +904,15 @@
           const val = btn.getAttribute('data-val') || null;
           
           if (cmd) {
-            // Perbaikan lintas browser: formatBlock memerlukan tag dengan <> di beberapa browser
             const execVal = (cmd === 'formatBlock' && val) ? `<${val}>` : val;
-            
             document.execCommand(cmd, false, execVal);
             document.getElementById('noteContentEditor').focus();
             autoSaveActiveNote();
-            
             setTimeout(updateToolbarActiveStates, 50);
           }
         });
       });
 
-      // Text Color
       document.getElementById('textColorPicker').addEventListener('input', (e) => {
         document.execCommand('foreColor', false, e.target.value);
         document.getElementById('noteContentEditor').focus();
@@ -937,13 +923,9 @@
         showToolbar();
       });
 
-      // Highlight Color (NEW)
       document.getElementById('highlightColorPicker').addEventListener('input', (e) => {
-        // 'hiliteColor' adalah standar untuk highlighting, 'backColor' sebagai fallback
         let success = document.execCommand('hiliteColor', false, e.target.value);
-        if (!success) {
-          document.execCommand('backColor', false, e.target.value);
-        }
+        if (!success) document.execCommand('backColor', false, e.target.value);
         document.getElementById('noteContentEditor').focus();
         autoSaveActiveNote();
       });
@@ -1053,7 +1035,7 @@
 
       // Swipe to go back
       let touchStartX = 0, touchStartY = 0;
-      editorPanel = document.getElementById('editorPanel');
+      const editorPanel = document.getElementById('editorPanel');
 
       editorPanel.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
